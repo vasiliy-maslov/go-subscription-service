@@ -1,0 +1,230 @@
+basePath: /api/v1
+definitions:
+  http.CreateResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  http.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  http.StatusResponse:
+    properties:
+      status:
+        type: string
+    type: object
+  http.TotalCostResponse:
+    properties:
+      total_cost:
+        type: integer
+    type: object
+  model.Subscription:
+    properties:
+      created_at:
+        type: string
+      end_date:
+        type: string
+      id:
+        type: string
+      price:
+        type: integer
+      service_name:
+        type: string
+      start_date:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API Server for Subscription Management Application
+  title: Subscription Service API
+  version: "1.0"
+paths:
+  /subscriptions:
+    post:
+      consumes:
+      - application/json
+      description: Adds a new subscription to the database based on the provided data.
+      parameters:
+      - description: Subscription data to create. ID, CreatedAt, UpdatedAt will be
+          ignored.
+        in: body
+        name: subscription
+        required: true
+        schema:
+          $ref: '#/definitions/model.Subscription'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/http.CreateResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Create a new subscription
+      tags:
+      - subscriptions
+  /subscriptions/{id}:
+    delete:
+      description: Deletes a subscription by its UUID.
+      parameters:
+      - description: Subscription UUID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid UUID format
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Subscription not found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Delete a subscription
+      tags:
+      - subscriptions
+    get:
+      description: Retrieves full details of a subscription by its UUID.
+      parameters:
+      - description: Subscription UUID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Subscription'
+        "400":
+          description: Invalid UUID format
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Subscription not found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Get a subscription by ID
+      tags:
+      - subscriptions
+    put:
+      consumes:
+      - application/json
+      description: Updates the details of an existing subscription by its UUID.
+      parameters:
+      - description: Subscription UUID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New subscription data. All fields must be provided.
+        in: body
+        name: subscription
+        required: true
+        schema:
+          $ref: '#/definitions/model.Subscription'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.StatusResponse'
+        "400":
+          description: Invalid request body or UUID format
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Subscription not found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Update an existing subscription
+      tags:
+      - subscriptions
+  /subscriptions/total_cost:
+    get:
+      description: Calculates the total cost of subscriptions for a user over a specified
+        period.
+      parameters:
+      - description: User UUID
+        format: uuid
+        in: query
+        name: user_id
+        required: true
+        type: string
+      - description: Start period in YYYY-MM format
+        example: '"2024-01"'
+        in: query
+        name: start_period
+        required: true
+        type: string
+      - description: End period in YYYY-MM format
+        example: '"2024-12"'
+        in: query
+        name: end_period
+        required: true
+        type: string
+      - description: 'Optional: filter by service name'
+        in: query
+        name: service_name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.TotalCostResponse'
+        "400":
+          description: Missing or invalid query parameters
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Calculate total subscription cost
+      tags:
+      - subscriptions
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
